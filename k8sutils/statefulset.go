@@ -3,6 +3,7 @@ package k8sutils
 import (
 	"context"
 	// "github.com/google/go-cmp/cmp"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apiequality "k8s.io/apimachinery/pkg/api/equality"
@@ -49,6 +50,11 @@ func GenerateStateFulSetsDef(cr *redisv1beta1.Redis, labels map[string]string, r
 	}
 	if cr.Spec.Tolerations != nil {
 		statefulset.Spec.Template.Spec.Tolerations = *cr.Spec.Tolerations
+	}
+	if cr.Spec.Volumes != nil && len(cr.Spec.Volumes) > 0 {
+		for _, volume := range cr.Spec.Volumes {
+			statefulset.Spec.Template.Spec.Volumes = append(statefulset.Spec.Template.Spec.Volumes, volume.Volume)
+		}
 	}
 	AddOwnerRefToObject(statefulset, AsOwner(cr))
 	return statefulset
@@ -109,6 +115,11 @@ func GenerateContainerDef(cr *redisv1beta1.Redis, role string) corev1.Container 
 			MountPath: "/data",
 		}
 		containerDefinition.VolumeMounts = append(containerDefinition.VolumeMounts, VolumeMounts)
+	}
+	if cr.Spec.Volumes != nil && len(cr.Spec.Volumes) > 0 {
+		for _, volume := range cr.Spec.Volumes {
+			containerDefinition.VolumeMounts = append(containerDefinition.VolumeMounts, volume.Mount)
+		}
 	}
 	if cr.Spec.GlobalConfig.Password != nil && cr.Spec.GlobalConfig.ExistingPasswordSecret == nil {
 		containerDefinition.Env = append(containerDefinition.Env, corev1.EnvVar{

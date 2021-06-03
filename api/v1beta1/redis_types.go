@@ -40,6 +40,7 @@ type RedisSpec struct {
 	SecurityContext   *corev1.PodSecurityContext `json:"securityContext,omitempty"`
 	PriorityClassName string                     `json:"priorityClassName,omitempty"`
 	Affinity          *corev1.Affinity           `json:"affinity,omitempty"`
+	Volumes           []Volume                   `json:"volumes,omitempty"`
 	Tolerations       *[]corev1.Toleration       `json:"tolerations,omitempty"`
 }
 
@@ -48,9 +49,15 @@ type RedisStatus struct {
 	Cluster RedisSpec `json:"cluster,omitempty"`
 }
 
-// Storage is the inteface to add pvc and pv support in redis
+// Storage is the interface to add pvc and pv support in redis
 type Storage struct {
 	VolumeClaimTemplate corev1.PersistentVolumeClaim `json:"volumeClaimTemplate,omitempty"`
+}
+
+// Volume is the interface to add additional volumes to the redis instances (I.E: TLS Certificates, Additional Block Storage, for backups.)
+type Volume struct {
+	Volume corev1.Volume      `json:"volume,omitempty"`
+	Mount  corev1.VolumeMount `json:"mount,omitempty"`
 }
 
 // RedisMaster interface will have the redis master configuration
